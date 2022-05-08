@@ -1,70 +1,74 @@
-# Getting Started with Create React App
+# Gravity Legal take home test
+## CODE:
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## SQL
+### In MySQL workbench:
+CREATE DATABASE gravitylegal;
+USE gravitylegal;
 
-## Available Scripts
+CREATE TABLE invoices(
+invoice_number INT AUTO_INCREMENT PRIMARY KEY UNIQUE,
+title VARCHAR(125),
+description VARCHAR(500),
+amount decimal
+);
 
-In the project directory, you can run:
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'Th3R00t)fAll#v1l!sM0n3y';
+flush privileges;
 
-### `yarn start`
+### In ./server/index.js, configure the connection like this:
+db = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: 'Th3R00t)fAll#v1l!sM0n3y',
+  database: 'gravitylegal'
+});
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## TESTS:
+### ADD INVOICE:
+REQUEST:
+curl -X POST \
+ http://localhost:3001/invoices/new \
+ -H "Content-Type: application/json" \
+ -d '{"title": "Invoice10", "description":"this is the tenth invoice", "amount":"25000"}'
+RESONSE:
+{"status":200,"data":{"url":"localhost:3000/pay_invoice/10"},"message":"New invoice 10 added successfully"}
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### FAIL TO ADD INVALID INVOICE:
+curl -X POST \
+ http://localhost:3001/invoices/new \
+ -H "Content-Type: application/json" \
+ -d '{"title": "Invoice8", "description":"this is the eighth invoice", "amount":"-15000"}'
+RESPONSE:
+{"status":0,"errors":[{"code":"123","desription":"amount cannot be negative"}]}
 
-### `yarn test`
+### UPDATE INVOICE AMOUNT DUE
+REQUEST:
+curl -X PUT \
+ http://localhost:3001/invoices/10 \
+ -H "Content-Type: application/json" \
+ -d '{"remainderDue": "20000"}'
+ RESPONSE:
+ {"status":200,"data":{"fieldCount":0,"affectedRows":1,"insertId":0,"serverStatus":2,"warningCount":0,"message":"(Rows matched: 1  Changed: 1  Warnings: 0","protocol41":true,"changedRows":1},"message":"Invoice 10 updated successfully"}
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+ ### FAIL TO UPDATE INVOICE:
+ I did the error handling in the client. I chose to do the calculation before sending off an update as opposed to handling the errors in the application.
 
-### `yarn build`
+## OTHER COMMANDS:
+### LIST ALL INVOICES:
+curl -X GET \
+ http://localhost:3001/invoices/list \
+ -H "Content-Type: application/json" \
+ RESPONSE:
+ {"status":200,"data":[{"invoice_number":1,"title":"Invoice1","description":"this is the first invoice","amount":0},{"invoice_number":2,"title":"Invoice2","description":"this is the second invoice","amount":0},{"invoice_number":3,"title":"Invoice3","description":"this is the third invoice","amount":1850},{"invoice_number":4,"title":"Invoice4","description":"this is the fourth invoice","amount":15000},{"invoice_number":5,"title":"Invoice4","description":"this is the fourth invoice","amount":15000},{"invoice_number":6,"title":"Invoice5","description":"this is the fifth invoice","amount":15000},{"invoice_number":7,"title":"Invoice7","description":"this is the seventh invoice","amount":15000},{"invoice_number":8,"title":"Invoice8","description":"this is the eighth invoice","amount":15000},{"invoice_number":9,"title":"Invoice9","description":"this is the ninth invoice","amount":1000},{"invoice_number":10,"title":"Invoice10","description":"this is the tenth invoice","amount":20000}],"message":"Invoices list retrieved successfully"}
+**Note: You can also run this command from the browser:
+http://localhost:3001/invoices/list
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `yarn build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### LIST SINGLE INVOICE BY INVOICE NUMBER:
+curl -X GET \       
+ http://localhost:3001/invoices/1 \
+ -H "Content-Type: application/json" \
+ RESPONSE:
+{"status":200,"data":[{"invoice_number":1,"title":"Invoice1","description":"this is the first invoice","amount":0}],"message":"Invoice 1 retrieved successfully"}
+**Note: You can also run this command from the brower:
+http://localhost:3001/invoices/1
