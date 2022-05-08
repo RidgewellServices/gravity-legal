@@ -22,7 +22,19 @@ router.get('/:invoice_number', function(req, res) {
     res.json({
       status: 200,
       data,
-      message: `Invoice ${data} retrieved successfully`
+      message: `Invoice ${req.params.invoice_number} retrieved successfully`
+    })
+  })
+});
+// update invoice amount by invoice_number
+router.put('/:invoice_number', function(req, res) {
+  let sql = `UPDATE invoices SET amount='${req.body.remainderDue}' WHERE invoice_number='${req.params.invoice_number}'`;
+  db.query(sql, function(err, data, fields) {
+    if (err) throw err;
+    res.json({
+      status: 200,
+      data,
+      message: `Invoice ${req.params.invoice_number} updated successfully`
     })
   })
 });

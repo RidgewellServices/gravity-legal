@@ -12,7 +12,9 @@ import './App.css';
 const PayInvoice = () => {
   const [buttonDisabled, setButtonDisabled] = useState(true);
   const [labelValue, setLabelValue] = useState('Amount');
-  const [textValue, setTextValue] = useState(`Please enter amount up to ${labelValue}`)
+  const [textFieldDisabled, setTextFieldDisabled] = useState(true);
+  const [textFieldValue, setTextFieldValue] = useState('');
+  const [textValue, setTextValue] = useState(``)
   const [textErrorState, setTextErrorState] = useState(false);
   const [invoice, setData] = useState([]);
   const { invoice_number, } = useParams()
@@ -23,12 +25,12 @@ const PayInvoice = () => {
         const invoice = data.data[0];
         setData(invoice);
         if (invoice.amount > 0) {
-          setButtonDisabled(false);
+          setTextFieldDisabled(false);
           setLabelValue(`$${invoice.amount}`)
         };
         if (invoice.amount === 0) {
           setLabelValue('Invoice is paid');
-          setTextValue('Thank you for your payment');
+          setTextValue('Thank you for your business');
         }
       });
   }, [invoice_number]);
@@ -45,9 +47,10 @@ const PayInvoice = () => {
   const validateAmount= (e) => {
     const value = e.target.value;
     if (isNumeric(value)) {
+      setButtonDisabled(false);
       setTextErrorState(false);
-      setLabelValue(`$${invoice.amount}`);
-      setTextValue(`Please enter amount up to $${labelValue}`);  
+      setTextValue(`Please enter amount up to $${invoice.amount}`); 
+      setTextFieldValue(value) 
     }
     if (!isNumeric(value)) {
       setTextValue('Please enter a valid number');
@@ -61,6 +64,44 @@ const PayInvoice = () => {
     }
   };
 
+  const submitPayment = () => {
+    const remainderDue = invoice.amount - textFieldValue;
+    fetch(`/invoices/${invoice_number}`, {
+      method: 'PUT',
+      mode: 'cors',
+      headers: new Headers({
+        'Content-Type': 'application/json',
+      }),
+      body: JSON.stringify({ "remainderDue": `${remainderDue}` })
+    })
+    .then(() => {
+      fetch(`/invoices/${invoice_number}`)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(`after the call ${data.data[0].amount}`)
+        const invoice = data.data[0];
+        setData(invoice);
+        if (invoice.amount > 0) {
+          setButtonDisabled(true);
+          setLabelValue(`$${invoice.amount}`)
+          setTextFieldValue('')
+          setTextValue(`Thanks for your payment of $${textFieldValue}`)
+        };
+        if (invoice.amount === 0) {
+          setButtonDisabled(true);
+          setLabelValue('Invoice is paid');
+          setTextFieldValue('Invoice is paid');
+          setTextValue('Thank you for your payment');
+          setTextFieldDisabled(true);
+          setTextFieldValue('');
+        }
+      })
+    })
+    .catch((error) => {
+        console.error(error);
+    });
+  }
+
   const contents = () => (
     <Box>
       <Typography variant='h6'>
@@ -73,10 +114,11 @@ const PayInvoice = () => {
         Description: {invoice.description}
       </Typography>
       <Typography variant='h6'>
-        Amount: ${invoice.amount}
+        Amount owed: ${invoice.amount}
       </Typography>
       <Button
         disabled={buttonDisabled}
+        onClick={submitPayment}
         variant='contained'
         size='large'
       >
@@ -84,10 +126,11 @@ const PayInvoice = () => {
       </Button>
       <TextField
         id="amount field"
-        disabled={buttonDisabled}
+        disabled={textFieldDisabled}
         error={textErrorState}
         onChange={e => validateAmount(e)}
         label={labelValue}
+        value={textFieldValue}
         variant="outlined"
         size='small'
       />
