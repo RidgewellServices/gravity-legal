@@ -41,20 +41,32 @@ router.put('/:invoice_number', function(req, res) {
 
 // create new invoice
 router.post('/new', function(req, res) {
-  let sql = `INSERT INTO invoices(title, description, amount) VALUES (?)`;
-  let values = [
-    req.body.title,
-    req.body.description,
-    req.body.amount
-  ];
-  db.query(sql, [values], function(err, data, fields) {
-    if (err) throw err;
+  if (req.body.amount < 0) {
     res.json({
-      status: 200,
-      data: { "url": `localhost:3000/pay_invoice/${data.insertId}`},
-      message: "New invoice added successfully"
+      status: 0,
+      "errors": [
+        {
+          "code":"123",
+          "desription":"amount cannot be negative"
+        }
+      ]
     })
-  })
+  } else {
+    let sql = `INSERT INTO invoices(title, description, amount) VALUES (?)`;
+    let values = [
+      req.body.title,
+      req.body.description,
+      req.body.amount
+    ];
+    db.query(sql, [values], function(err, data, fields) {
+      if (err) throw err;
+      res.json({
+        status: 200,
+        data: { "url": `localhost:3000/pay_invoice/${data.insertId}`},
+        message: `New invoice ${data.insertId} added successfully`
+      })
+    })
+  }
 });
 
 module.exports = router;
