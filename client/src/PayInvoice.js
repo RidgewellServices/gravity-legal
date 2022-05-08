@@ -26,7 +26,7 @@ const PayInvoice = () => {
         setData(invoice);
         if (invoice.amount > 0) {
           setTextFieldDisabled(false);
-          setLabelValue(`$${invoice.amount}`)
+          setLabelValue(`$${invoice.amount}`);
         };
         if (invoice.amount === 0) {
           setLabelValue('Invoice is paid');
@@ -78,7 +78,6 @@ const PayInvoice = () => {
       fetch(`/invoices/${invoice_number}`)
       .then((res) => res.json())
       .then((data) => {
-        console.log(`after the call ${data.data[0].amount}`)
         const invoice = data.data[0];
         setData(invoice);
         if (invoice.amount > 0) {
