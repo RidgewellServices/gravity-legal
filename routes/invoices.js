@@ -51,6 +51,7 @@ router.post('/new', function(req, res) {
     if (err) throw err;
     res.json({
       status: 200,
+      data: { "url": `localhost:3000/pay_invoice/${data.insertId}`},
       message: "New invoice added successfully"
     })
   })
