@@ -1,5 +1,25 @@
 # Gravity Legal take home test
 ## CODE:
+git clone https://github.com/RidgewellServices/gravity-legal.git
+
+set up #SQL db/table as below
+
+at root:
+yarn install
+at /client:
+yarn install
+
+at root:
+yarn start
+at /client:
+yarn start
+
+at terminal root:
+#ADD INVOICE
+
+at browser:
+localhost:3000/pay_invoice/<invoice number>
+e.g. http://localhost:3000/pay_invoice/1
 
 ## SQL
 ### In MySQL workbench:
@@ -72,3 +92,16 @@ curl -X GET \
 {"status":200,"data":[{"invoice_number":1,"title":"Invoice1","description":"this is the first invoice","amount":0}],"message":"Invoice 1 retrieved successfully"}
 **Note: You can also run this command from the brower:
 http://localhost:3001/invoices/1
+
+### PAY INVOICE:
+enter amount owed in text field
+click Pay button
+
+- if amount is partially paid, it shows the amount still owed, lets you keep paying, and shows "Thanks for your payment of $<amount>"
+- if amount is totally paid, it shows "Invoice is paid" and "Thank you for your payment"
+- if you enter something other than digits, it won't let you and shows "Please enter a valid number"
+
+## Notes
+- if you go to http://localhost:3000/, you can select from a list of invoices to pay (as if you were the user with multiple invoices). Just makes it easier to test.
+- to cheat and add an amount onto an invoice, use the terminal with #UPDATE INVOICE AMOUNT DUE
+- I feel bad about disregarding tests, but there was a time limit and I opted to implement the db.
