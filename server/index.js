@@ -5,13 +5,17 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const invoicesRouter = require('../routes/invoices');
 
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
+
 const PORT = process.env.PORT || 3001;
 
 db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'Th3R00t)fAll#v1l!sM0n3y',
-  database: 'gravitylegal'
+  host: process.env.HOST,
+  user: process.env.DB_USER,
+  password: process.env.PASSWORD,
+  database: process.env.DB
 });
 
 const app = express();
