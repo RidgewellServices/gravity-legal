@@ -13,14 +13,15 @@ import {
   ListItemText,
   Typography,
 } from '@mui/material';
+import { invoiceArrayType, } from '../types'
 import "./App.css";
 
-const ListItemLink = (props) => {
+const ListItemLink = (props: {primary: string, to: string}) => {
   const { primary, to, } = props
 
   const CustomLink = useMemo(
     () =>
-      forwardRef((linkProps, ref) => (
+      forwardRef<HTMLAnchorElement>((linkProps: any, ref: any) => (
         <Link ref={ref} to={to} {...linkProps} />
       )),
       [to,]
@@ -51,11 +52,11 @@ const Home = () => {
       .then((data) => setData(data.data));
   }, []);
 
-  const checkForContent = (content) => {
+  const checkForContent = (content: any) => {
     return !(content && Object.keys(content).length === 0 && Object.getPrototypeOf(content) === Object.prototype)
   }
   
-  const invoicesListBoxes = (invoices) => invoices.map(({invoice_number, title, amount}) => {
+  const invoicesListBoxes = (invoices: invoiceArrayType) => invoices.map(({invoice_number, title, amount}) => {
     return (
       <List>
         <ListItem

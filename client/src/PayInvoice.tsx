@@ -7,16 +7,24 @@ import {
   Typography,
   TextField,
 } from '@mui/material';
+import { invoiceType, } from '../types'
 import './App.css';
+
+const emptyInvoice = {
+  invoice_number: -1,
+  title: '',
+  description: '',
+  amount: 0
+}
 
 const PayInvoice = () => {
   const [buttonDisabled, setButtonDisabled] = useState(true);
   const [labelValue, setLabelValue] = useState('Amount');
   const [textFieldDisabled, setTextFieldDisabled] = useState(true);
-  const [textFieldValue, setTextFieldValue] = useState('');
+  const [textFieldValue, setTextFieldValue] = useState<string>('');
   const [textValue, setTextValue] = useState(``)
   const [textErrorState, setTextErrorState] = useState(false);
-  const [invoice, setData] = useState([]);
+  const [invoice, setData] = useState<invoiceType>(emptyInvoice);
   const { invoice_number, } = useParams()
   useEffect(() => {
     fetch(`/invoices/${invoice_number}`)
@@ -35,16 +43,16 @@ const PayInvoice = () => {
       });
   }, [invoice_number]);
 
-  const checkForContent = (content) => {
+  const checkForContent = (content: any) => {
     return !(content && Object.keys(content).length === 0 && Object.getPrototypeOf(content) === Object.prototype)
   };
 
-  const isNumeric = (str) => {
+  const isNumeric = (str: number) => {
     if (typeof str != "string") return false 
     return !isNaN(str) && !isNaN(parseFloat(str))
   }
 
-  const validateAmount= (e) => {
+  const validateAmount= (e: any) => {
     const value = e.target.value;
     if (isNumeric(value)) {
       setButtonDisabled(false);
@@ -65,7 +73,7 @@ const PayInvoice = () => {
   };
 
   const submitPayment = () => {
-    const remainderDue = invoice.amount - textFieldValue;
+    const remainderDue = invoice.amount - parseInt(textFieldValue);
     fetch(`/invoices/${invoice_number}`, {
       method: 'PUT',
       mode: 'cors',
